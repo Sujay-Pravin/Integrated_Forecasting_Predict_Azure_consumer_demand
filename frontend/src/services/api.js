@@ -24,4 +24,8 @@ export const endpoints = {
   topRegionsStorage : 'top-regions-storage',
   peakDemandStorage : 'peak-demand-storage',
   RawData : "raw-data",
+  topRegionsEfficiency: "top-regions-efficiency",
+  peakEfficiency:"peak-efficiency",
+  regionalComparisonEfficiency:"regional-comparison-efficiency",
+  holidayEfficiencyImpact:"holiday-efficiency-impact",
 };

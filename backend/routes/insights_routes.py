@@ -6,7 +6,7 @@ insights_bp = Blueprint("insights", __name__)
 
 # ---------- Load dataset ----------
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
-file_path = os.path.join(BASE_DIR, "Data", "Processed", "cleaned_merged.csv")
+file_path = os.path.join(BASE_DIR, "Data", "Processed", "insights.csv")
 
 df = pd.read_csv(file_path)
 df["date"] = pd.to_datetime(df["date"])
@@ -168,3 +168,63 @@ def storage_peak_demand():
     df_copy["month"] = df_copy["date"].dt.to_period("M").astype(str)
     monthly = df_copy.groupby("month")["usage_storage"].max().reset_index()
     return safe_df(monthly)
+
+
+
+#-----------------------------milestone - 2 -----------------------------------------------------
+
+
+
+
+# 12. Top regions by efficiency
+@insights_bp.route("/top-regions-efficiency", methods=["GET"])
+def top_regions_efficiency():
+    top = (
+        df.groupby("region")["storage_efficiency"]
+        .mean().round(2)
+        .reset_index()
+        .sort_values(by="storage_efficiency", ascending=False)
+        .head(5)
+    )
+    return safe_df(top)
+
+
+# 13. Peak efficiency per month
+@insights_bp.route("/peak-efficiency", methods=["GET"])
+def peak_efficiency():
+    df_copy = df.copy()
+    df_copy["month"] = df_copy["date"].dt.to_period("M").astype(str)
+    monthly = df_copy.groupby("month")["storage_efficiency"].max().reset_index()
+    return safe_df(monthly)
+
+
+# 14. Regional comparison including efficiency
+@insights_bp.route("/regional-comparison-efficiency", methods=["GET"])
+def regional_comparison_efficiency():
+    comparison = (
+        df.groupby("region")
+        .agg({
+            "storage_efficiency": ["mean", "max", "std"],
+            "usage_storage": ["mean", "max", "std"]
+        })
+        .round(2)
+    )
+    return safe_df(comparison)
+
+
+# 15. Holiday vs Non-holiday efficiency impact
+@insights_bp.route("/holiday-efficiency-impact", methods=["GET"])
+def holiday_efficiency_impact():
+    if "holiday" not in df.columns:
+        return jsonify({"error": "holiday column not found in dataset"}), 400
+
+    holiday_stats = (
+        df.groupby("holiday")
+        .agg({
+            "storage_efficiency": "mean",
+            "usage_storage": "mean"
+        })
+        .round(2)
+    )
+    return safe_df(holiday_stats)
+

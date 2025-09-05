@@ -8,6 +8,10 @@
   transition: transform 0.2s ease;
 }
 
+.chart-card.glow{
+  border: 2px solid tomato;
+}
+
 .chart-header{
   display: flex;
   justify-content: space-between;

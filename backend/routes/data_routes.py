@@ -5,7 +5,7 @@ from flask import Blueprint, jsonify
 data_bp = Blueprint("data", __name__)
 
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
-file_path = os.path.join(BASE_DIR, "Data", "Processed", "cleaned_merged.csv")
+file_path = os.path.join(BASE_DIR, "Data", "Processed", "insights.csv")
 
 print("🔍 Loading file from:", file_path)
 

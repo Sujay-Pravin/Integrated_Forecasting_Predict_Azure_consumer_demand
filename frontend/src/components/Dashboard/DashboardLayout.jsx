@@ -22,9 +22,21 @@ const viewApiMap = {
     endpoints.topRegionsStorage,
     endpoints.insightsStorage,
     endpoints.usageTrendsStorage,
+    endpoints.peakEfficiency,
+    endpoints.topRegionsEfficiency,
   ],
-  resources: [endpoints.monthlyTrends, endpoints.holidayImpact],
-  regions: [endpoints.regionalComparison, endpoints.topRegions,  endpoints.topRegionsStorage,],
+  resources: [
+    endpoints.monthlyTrends,
+    endpoints.holidayImpact,
+    endpoints.holidayEfficiencyImpact,
+  ],
+  regions: [
+    endpoints.regionalComparison,
+    endpoints.topRegions,
+    endpoints.topRegionsStorage,
+    endpoints.regionalComparisonEfficiency,
+    endpoints.topRegionsEfficiency,
+  ],
 };
 
 const DashboardLayout = () => {
@@ -88,42 +100,71 @@ const DashboardLayout = () => {
         )}
       </div>
 
-      {activeView === "overview" && activeResource === 'CPU' && (
+      {activeView === "overview" && activeResource === "CPU" && (
         <div className="dashboard-grid">
           <ChartCard title="Insights Summary">
-            <InsightsSummaryChart data={data.insights} resource={activeResource}/>
+            <InsightsSummaryChart
+              data={data.insights}
+              resource={activeResource}
+            />
           </ChartCard>
 
           <ChartCard title="CPU Usage Trends">
-            <UsageTrendsChart data={data.usageTrends} resource={activeResource}/>
+            <UsageTrendsChart
+              data={data.usageTrends}
+              resource={activeResource}
+            />
           </ChartCard>
 
           <ChartCard title="Top Regions">
-            <TopRegionsChart data={data.topRegions} resource={activeResource}/>
+            <TopRegionsChart data={data.topRegions} resource={activeResource} />
           </ChartCard>
 
           <ChartCard title="Peak Demand (Monthly)">
-            <PeakDemandChart data={data.peakDemand} resource={activeResource}/>
+            <PeakDemandChart data={data.peakDemand} resource={activeResource} />
           </ChartCard>
         </div>
       )}
 
-      {activeView === "overview" && activeResource === 'Storage' && (
+      {activeView === "overview" && activeResource === "Storage" && (
         <div className="dashboard-grid">
           <ChartCard title="Storage Insights Summary">
-            <InsightsSummaryChart data={data.insightsStorage} resource={activeResource}/>
+            <InsightsSummaryChart
+              data={data.insightsStorage}
+              resource={activeResource}
+            />
           </ChartCard>
 
           <ChartCard title="Storage Usage Trends">
-            <UsageTrendsChart data={data.usageTrendsStorage} resource={activeResource} />
+            <UsageTrendsChart
+              data={data.usageTrendsStorage}
+              resource={activeResource}
+            />
           </ChartCard>
 
           <ChartCard title="Top Regions by Storage">
-            <TopRegionsChart data={data.topRegionsStorage} resource={activeResource}/>
+            <TopRegionsChart
+              data={data.topRegionsStorage}
+              resource={activeResource}
+            />
           </ChartCard>
 
           <ChartCard title="Peak Demand (Monthly)">
-            <PeakDemandChart data={data.peakDemandStorage} resource={activeResource}/>
+            <PeakDemandChart
+              data={data.peakDemandStorage}
+              resource={activeResource}
+            />
+          </ChartCard>
+
+          <ChartCard title="Peak Efficiency" className="glow">
+            <PeakDemandChart data={data.peakEfficiency} resource="Efficiency" />
+          </ChartCard>
+
+          <ChartCard title="Top Regions by Efficiency" className="glow">
+            <TopRegionsChart
+              data={data.topRegionsEfficiency}
+              resource="Efficiency"
+            />
           </ChartCard>
         </div>
       )}
@@ -137,6 +178,13 @@ const DashboardLayout = () => {
           <ChartCard title="Holiday Impact">
             <HolidayImpactChart data={data.holidayImpact} />
           </ChartCard>
+
+          <ChartCard title="Holiday Efficiency Impact" className="glow">
+            <HolidayImpactChart
+              data={data.holidayEfficiencyImpact}
+              resource="Efficiency"
+            />
+          </ChartCard>
         </div>
       )}
 
@@ -148,16 +196,37 @@ const DashboardLayout = () => {
 
           <ChartCard title="Top Regions">
             <div className="dashboard-header">
-            <select
-              value={activeResource}
-              onChange={(e) => setActiveResource(e.target.value)}
-              className="view-selector"
-            >
-              <option value="CPU">CPU</option>
-              <option value="Storage">Storage</option>
-            </select>
-          </div>
-            <TopRegionsChart data={activeResource === "CPU" ? data.topRegions: data.topRegionsStorage} resource={activeResource}/>
+              <select
+                value={activeResource}
+                onChange={(e) => setActiveResource(e.target.value)}
+                className="view-selector"
+              >
+                <option value="CPU">CPU</option>
+                <option value="Storage">Storage</option>
+              </select>
+            </div>
+            <TopRegionsChart
+              data={
+                activeResource === "CPU"
+                  ? data.topRegions
+                  : data.topRegionsStorage
+              }
+              resource={activeResource}
+            />
+          </ChartCard>
+
+          <ChartCard title="Top Regions by Efficiency" className="glow">
+            <TopRegionsChart
+              data={data.topRegionsEfficiency}
+              resource="Efficiency"
+            />
+          </ChartCard>
+
+          <ChartCard title="Regional Comparison Efficiency" className="glow">
+            <RegionalComparisonChart
+              data={data.regionalComparisonEfficiency}
+              resource="Efficiency"
+            />
           </ChartCard>
         </div>
       )}

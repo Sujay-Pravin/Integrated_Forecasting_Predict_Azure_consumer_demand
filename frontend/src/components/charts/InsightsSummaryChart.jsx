@@ -6,7 +6,13 @@ const InsightsSummaryChart = ({ data, resource }) => {
     return <div className="summary-loading">Loading summary...</div>;
   }
 
-  const { avg_cpu_usage, avg_storage_usage, peak_usage, total_records, top_region } = data;
+  const {
+    avg_cpu_usage,
+    avg_storage_usage,
+    peak_usage,
+    total_records,
+    top_region,
+  } = data;
 
   return (
     <div className="insights-summary-grid">
@@ -17,11 +23,18 @@ const InsightsSummaryChart = ({ data, resource }) => {
         {resource == "Storage" && (
           <span className="summary-value">{avg_storage_usage} GB</span>
         )}
-        <span className="summary-label">Avg CPU Usage</span>
+        <span className="summary-label">
+          Avg {resource === "CPU" ? "CPU" : "Storage"} Usage
+        </span>
       </div>
       <div className="summary-card">
-        <span className="summary-value">{peak_usage}%</span>
-        <span className="summary-label">Peak CPU Usage</span>
+        <span className="summary-value">
+          {peak_usage}
+          {resource === "CPU" ? " %" : " GB"}
+        </span>
+        <span className="summary-label">
+          Peak {resource === "CPU" ? "CPU" : "Storage"} Usage
+        </span>
       </div>
       <div className="summary-card">
         <span className="summary-value">{total_records}</span>
