@@ -51,3 +51,13 @@ select.view-selector option {
 }
 
 
+.rolling-input{
+    width: 50px;
+  padding: 8px;
+  background: var(--nav-bg);
+  border-radius: 8px;
+  border: 1px solid var(--dark-100);
+  margin: 0 8px;
+  scrollbar-width: none;
+  color: var(--text-color);
+}

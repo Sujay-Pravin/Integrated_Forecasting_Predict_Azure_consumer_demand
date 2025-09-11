@@ -1,14 +1,16 @@
 # 🚀 Updates: Storage Efficiency Features
 
 ## 📊 New Dataset Columns in `insights.csv`
+
 - **`storage_allocated`** → Maximum storage used by each `(region, resource_type)` across the dataset.  
 - **`storage_efficiency`** → Ratio of actual usage vs allocated storage (in %), showing how efficiently resources are utilized.  
 
 ---
 
 ## 🌐 New API Endpoints
+
 New routes were created for the following in the Flask backend:
- 
+
 - Top regions ranked by efficiency.  
 - Monthly peak storage efficiency values.  
 - Regional stats including efficiency mean, max, std deviation.  
@@ -18,6 +20,7 @@ New routes were created for the following in the Flask backend:
 ---
 
 ## 📈 Frontend Visualizations
+
 Our React dashboard now includes efficiency-aware charts:
 
 - **Holiday Impact Chart** → Compares storage usage vs storage efficiency on holidays vs working days.  
@@ -33,6 +36,7 @@ Tooltips and axis labels automatically adapt to show `%` for efficiency metrics,
 ---
 
 ## ✅ Benefits
+
 - Detect **under-utilized storage** through low efficiency scores.  
 - Identify **high-performing regions** that maximize allocated resources.  
 - Understand **holiday vs working day storage behavior**.  

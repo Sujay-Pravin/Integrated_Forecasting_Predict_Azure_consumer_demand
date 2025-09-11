@@ -28,7 +28,22 @@ const Navigation = () => {
           <span className="nav-icon"></span>
           Dashboard
         </a>
+
+
         <a
+          onClick={() => {
+            navigate("/features");
+            setCurrent("features");
+          }}
+          className={current == "features" ? "nav-link active" : "nav-link"}
+        >
+          <span className="nav-icon"></span>
+          Features
+        </a>
+
+
+
+         <a
           onClick={() => {
             navigate("/data");
             setCurrent("Data");
@@ -37,7 +52,7 @@ const Navigation = () => {
         >
           <span className="nav-icon"></span>
           Data
-        </a>{" "}
+        </a>
       </div>
     </nav>
   );

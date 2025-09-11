@@ -8,9 +8,12 @@ import PeakDemandChart from "../charts/PeakDemandChart";
 import RegionalComparisonChart from "../charts/RegionalComparisonChart";
 import MonthlyTrendsChart from "../charts/MonthlyTrendsChart";
 import HolidayImpactChart from "../charts/HolidayImpactChart";
+import InsightsSummaryChart from "../charts/InsightsSummaryChart";
+
+import CpuRollingChart from "../charts/CpuRollingChart"; // import your new rolling chart
 
 import "./DashboardLayout.css";
-import InsightsSummaryChart from "../charts/InsightsSummaryChart";
+import { feature_endpoints, fetchData as feature_fetchData } from "../../services/feature_api";
 
 const viewApiMap = {
   overview: [
@@ -24,6 +27,9 @@ const viewApiMap = {
     endpoints.usageTrendsStorage,
     endpoints.peakEfficiency,
     endpoints.topRegionsEfficiency,
+    (window) => feature_endpoints.cpuRoll(window),
+    (window) => feature_endpoints.storageRoll(window),
+    (window) => feature_endpoints.usersRoll(window),
   ],
   resources: [
     endpoints.monthlyTrends,
@@ -44,16 +50,32 @@ const DashboardLayout = () => {
   const [loading, setLoading] = useState(true);
   const [activeView, setActiveView] = useState("overview");
   const [activeResource, setActiveResource] = useState("CPU");
+  const [rollingWindow, setRollingWindow] = useState(7);
+  const [locked, setLocked] = useState(true);
 
   const loadData = async (view) => {
     try {
       setLoading(true);
       const apis = viewApiMap[view];
-      const results = await Promise.all(apis.map((api) => fetchData(api)));
+
+      // if api is a function (rolling endpoints), pass rollingWindow
+      const results = await Promise.all(
+        apis.map((api) =>
+          typeof api === "function" ? feature_fetchData(api(rollingWindow)) : fetchData(api)
+        )
+      );
 
       const payload = {};
       apis.forEach((api, i) => {
-        const key = Object.keys(endpoints).find((k) => endpoints[k] === api);
+        let key;
+        if (typeof api === "function") {
+          // match based on function name
+          if (api.toString().includes("cpuRoll")) key = "cpuRoll";
+          else if (api.toString().includes("storageRoll")) key = "storageRoll";
+          else if (api.toString().includes("usersRoll")) key = "usersRoll";
+        } else {
+          key = Object.keys(endpoints).find((k) => endpoints[k] === api);
+        }
         payload[key] = results[i];
       });
 
@@ -67,7 +89,7 @@ const DashboardLayout = () => {
 
   useEffect(() => {
     loadData(activeView);
-  }, [activeView]);
+  }, [activeView, locked]); // reload when view changes or lock toggles
 
   if (loading) return <div className="loading">Loading...</div>;
 
@@ -87,19 +109,42 @@ const DashboardLayout = () => {
         </div>
 
         {activeView === "overview" && (
-          <div className="dashboard-header">
-            <select
-              value={activeResource}
-              onChange={(e) => setActiveResource(e.target.value)}
-              className="view-selector"
-            >
-              <option value="CPU">CPU</option>
-              <option value="Storage">Storage</option>
-            </select>
-          </div>
+          <>
+            <div className="dashboard-header">
+              <select
+                value={activeResource}
+                onChange={(e) => setActiveResource(e.target.value)}
+                className="view-selector"
+              >
+                <option value="CPU">CPU</option>
+                <option value="Storage">Storage</option>
+              </select>
+            </div>
+
+            {/* Rolling window input + lock button */}
+            <div className="dashboard-header rolling-control">
+              <input
+                type="text"
+                value={rollingWindow}
+                disabled={locked}
+                onChange={(e) => setRollingWindow(Number(e.target.value))}
+                className="rolling-input"
+              />
+              <button
+                onClick={() => setLocked(!locked)}
+                className="lock-btn"
+                style={{
+                borderColor: locked ? "var(--accent-color)" : "tomato", 
+              }}
+              >
+                {!locked ? "🔒 Lock" : "🔓 Unlock"}
+              </button>
+            </div>
+          </>
         )}
       </div>
 
+      {/* Overview - CPU */}
       {activeView === "overview" && activeResource === "CPU" && (
         <div className="dashboard-grid">
           <ChartCard title="Insights Summary">
@@ -116,6 +161,14 @@ const DashboardLayout = () => {
             />
           </ChartCard>
 
+          <ChartCard title={`CPU Rolling (Last ${rollingWindow} Days)`} className="glow">
+            <CpuRollingChart data={data.cpuRoll} />
+          </ChartCard>
+
+          <ChartCard title={`USERS Rolling (Last ${rollingWindow} Days)`} className="glow">
+            <CpuRollingChart data={data.usersRoll} />
+          </ChartCard>
+
           <ChartCard title="Top Regions">
             <TopRegionsChart data={data.topRegions} resource={activeResource} />
           </ChartCard>
@@ -126,6 +179,7 @@ const DashboardLayout = () => {
         </div>
       )}
 
+      {/* Overview - Storage */}
       {activeView === "overview" && activeResource === "Storage" && (
         <div className="dashboard-grid">
           <ChartCard title="Storage Insights Summary">
@@ -140,6 +194,10 @@ const DashboardLayout = () => {
               data={data.usageTrendsStorage}
               resource={activeResource}
             />
+          </ChartCard>
+
+          <ChartCard title={`Storage Rolling (Last ${rollingWindow} Days)`} className="glow">
+            <CpuRollingChart data={data.storageRoll} />
           </ChartCard>
 
           <ChartCard title="Top Regions by Storage">
@@ -168,7 +226,6 @@ const DashboardLayout = () => {
           </ChartCard>
         </div>
       )}
-
       {activeView === "resources" && (
         <div className="dashboard-grid">
           <ChartCard title="Monthly Trends">

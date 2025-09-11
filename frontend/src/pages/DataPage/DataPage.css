@@ -1,5 +1,17 @@
 .DataPage {
   padding: 20px;
+  overflow-x: hidden;
+}
+
+.DataPage-header{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.table-container{
+
+  overflow-x: scroll;
 }
 
 .data-table {

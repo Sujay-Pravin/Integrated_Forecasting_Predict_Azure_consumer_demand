@@ -2,12 +2,15 @@ from flask import Flask
 from flask_cors import CORS
 from routes.data_routes import data_bp
 from routes.insights_routes import insights_bp
+from routes.feature_routes import features_bp
+
 
 app = Flask(__name__)
 CORS(app)
 
 app.register_blueprint(data_bp, url_prefix="/api")
 app.register_blueprint(insights_bp, url_prefix="/api")
+app.register_blueprint(features_bp, url_prefix="/api/features")
 
 @app.route("/")
 def home():

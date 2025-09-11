@@ -1,0 +1,13 @@
+.feature-page{
+    padding: 20px;
+    overflow-x: hidden;
+    height: 100% - var();
+}
+
+
+
+.selectors{
+    display: flex;
+    gap: 10px;
+    margin: 15px 0;
+}

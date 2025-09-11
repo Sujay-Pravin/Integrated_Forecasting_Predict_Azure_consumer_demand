@@ -5,6 +5,7 @@ import Home from './pages/Home/Home'
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Navigation from './components/Navigation/Navigation';
 import DataPage from './pages/DataPage/DataPage';
+import FeaturePage from './pages/FeaturePage/FeaturePage';
 
 const Main = () => {
   useEffect(() => {
@@ -17,6 +18,7 @@ const Main = () => {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/data" element={<DataPage />} />
+        <Route path="/features" element={<FeaturePage/>} />
       </Routes>
     </>
   );
