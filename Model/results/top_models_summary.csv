@@ -1,0 +1,4 @@
+Target,Best_Model,Val_MAE,Val_RMSE,Val_MAPE,Val_Bias,Test_MAE,Test_RMSE,Test_MAPE,Test_Bias,Hyperparameters
+usage_cpu,XGBoost_GridSearch,12.3732,14.2072,17.7459,0.9036,12.6239,14.6669,18.6167,1.5974,"{'learning_rate': 0.05, 'max_depth': 5, 'n_estimators': 500, 'subsample': 0.7, 'colsample_bytree': 0..."
+usage_storage,Lasso_Default,2.1449,3.0102,0.2159,-0.2805,2.3226,3.3754,0.2251,-0.5567,Default
+users_active,XGBoost_GridSearch,72.0537,83.1992,23.2464,3.7674,72.996,84.5221,21.8858,-10.2722,"{'learning_rate': 0.1, 'max_depth': 6, 'n_estimators': 500, 'subsample': 0.8, 'colsample_bytree': 0...."

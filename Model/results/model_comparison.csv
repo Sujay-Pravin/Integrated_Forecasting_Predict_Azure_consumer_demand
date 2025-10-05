@@ -1,0 +1,31 @@
+Model,Target,Val_MAE,Val_RMSE,Val_MAPE,Val_Bias,Test_MAE,Test_RMSE,Test_MAPE,Test_Bias,Hyperparameters
+XGBoost_GridSearch,usage_cpu,12.3732,14.2072,17.7459,0.9036,12.6239,14.6669,18.6167,1.5974,"{'learning_rate': 0.05, 'max_depth': 5, 'n_estimators': 500, 'subsample': 0.7, 'colsample_bytree': 0..."
+XGBoost_GridSearch,usage_storage,7.6081,9.8672,0.6974,-1.9707,7.3358,9.1874,0.6662,-1.4834,"{'learning_rate': 0.01, 'max_depth': 4, 'n_estimators': 1000, 'subsample': 0.9, 'colsample_bytree': ..."
+XGBoost_GridSearch,users_active,72.0537,83.1992,23.2464,3.7674,72.996,84.5221,21.8858,-10.2722,"{'learning_rate': 0.1, 'max_depth': 6, 'n_estimators': 500, 'subsample': 0.8, 'colsample_bytree': 0...."
+XGBoost_Default,usage_cpu,12.4742,14.292,17.8262,0.6815,12.7509,14.8647,18.7469,1.352,Default
+XGBoost_Default,usage_storage,30.7051,38.9816,2.9069,0.6259,26.7583,34.8512,2.6562,4.5753,Default
+XGBoost_Default,users_active,73.0976,84.4065,23.7272,5.8111,73.2087,84.831,21.9333,-10.1072,Default
+RandomForest_Default,usage_cpu,12.4818,14.3469,17.8385,0.7737,13.0739,15.0306,19.1225,0.9708,Default
+RandomForest_Default,usage_storage,7.4245,9.4693,0.6324,-0.7641,6.936,8.9293,0.5763,0.0298,Default
+RandomForest_Default,users_active,75.0782,87.4523,24.7442,11.6673,74.1471,85.5229,22.2959,-7.7081,Default
+GradientBoosting_Default,usage_cpu,13.3733,15.5952,19.081,0.5549,13.7892,15.9298,19.93,0.8592,Default
+GradientBoosting_Default,usage_storage,4.2466,5.7422,0.377,-0.0852,4.0338,5.1835,0.3458,0.523,Default
+GradientBoosting_Default,users_active,79.2394,93.5584,26.1104,13.2723,80.3991,96.2176,24.4744,-4.2446,Default
+Ridge_Default,usage_cpu,13.1296,15.3232,18.8349,1.1861,13.06,15.1155,18.9343,0.1864,Default
+Ridge_Default,usage_storage,2.2151,3.0747,0.2254,-0.3464,2.4011,3.5597,0.2323,-0.8433,Default
+Ridge_Default,users_active,74.4058,88.3426,24.8715,17.647,72.5322,85.1943,22.2148,-4.0949,Default
+Lasso_Default,usage_cpu,12.6505,14.6634,18.2201,1.2947,12.6379,14.7174,18.3412,0.2427,Default
+Lasso_Default,usage_storage,2.1449,3.0102,0.2159,-0.2805,2.3226,3.3754,0.2251,-0.5567,Default
+Lasso_Default,users_active,74.6358,88.2024,24.99,18.829,72.693,84.6597,22.2783,-2.7712,Default
+LinearRegression_Default,usage_cpu,13.1516,15.3721,18.8634,1.1794,13.0558,15.1243,18.9402,0.2464,Default
+LinearRegression_Default,usage_storage,2.2215,3.079,0.226,-0.3609,2.4115,3.5783,0.2331,-0.8782,Default
+LinearRegression_Default,users_active,74.1497,87.9432,24.7702,16.9084,72.3512,85.1362,22.1379,-4.5256,Default
+LSTM,usage_cpu,12.9738,14.7635,18.2359,-0.1603,14.8669,16.6884,20.9417,-1.4231,Default
+GRU,usage_cpu,12.9762,14.7625,18.2672,-0.0467,14.8507,16.6829,20.9512,-1.3149,Default
+LSTM,usage_storage,357.3894,420.3903,35.5587,-1.9195,379.8481,432.1646,41.1811,69.4155,Default
+GRU,usage_storage,1193.2148,1265.1053,97.9551,-1193.2148,1121.8651,1200.222,97.8019,-1121.8652,Default
+LSTM,users_active,72.2655,83.3116,23.0501,0.8482,67.9735,79.164,19.9074,-11.4248,Default
+GRU,users_active,320.4861,331.1357,92.3896,-320.4861,332.7405,341.8391,92.7292,-332.7406,Default
+ARIMA,usage_cpu,12.5002,14.3213,17.6012,-0.4925,12.5333,14.6113,18.2088,0.4269,"{'order': (0, 1, 1), 'aic': np.float64(6100.941599867528)}"
+ARIMA,usage_storage,357.8827,420.1518,37.6771,73.0061,374.0881,432.056,37.5975,32.2542,"{'order': (0, 1, 1), 'aic': np.float64(11155.08935279168)}"
+ARIMA,users_active,72.9208,84.4866,23.6396,5.1855,73.2935,84.8909,21.9029,-11.2302,"{'order': (0, 1, 1), 'aic': np.float64(8755.755714909492)}"

@@ -58,7 +58,6 @@ const DashboardLayout = () => {
       setLoading(true);
       const apis = viewApiMap[view];
 
-      // if api is a function (rolling endpoints), pass rollingWindow
       const results = await Promise.all(
         apis.map((api) =>
           typeof api === "function" ? feature_fetchData(api(rollingWindow)) : fetchData(api)
@@ -69,7 +68,6 @@ const DashboardLayout = () => {
       apis.forEach((api, i) => {
         let key;
         if (typeof api === "function") {
-          // match based on function name
           if (api.toString().includes("cpuRoll")) key = "cpuRoll";
           else if (api.toString().includes("storageRoll")) key = "storageRoll";
           else if (api.toString().includes("usersRoll")) key = "usersRoll";
@@ -89,7 +87,7 @@ const DashboardLayout = () => {
 
   useEffect(() => {
     loadData(activeView);
-  }, [activeView, locked]); // reload when view changes or lock toggles
+  }, [activeView, locked]); 
 
   if (loading) return <div className="loading">Loading...</div>;
 
@@ -121,7 +119,6 @@ const DashboardLayout = () => {
               </select>
             </div>
 
-            {/* Rolling window input + lock button */}
             <div className="dashboard-header rolling-control">
               <input
                 type="text"
@@ -161,11 +158,11 @@ const DashboardLayout = () => {
             />
           </ChartCard>
 
-          <ChartCard title={`CPU Rolling (Last ${rollingWindow} Days)`} className="glow">
+          <ChartCard title={`CPU Rolling (Last ${rollingWindow} Days)`}  >
             <CpuRollingChart data={data.cpuRoll} />
           </ChartCard>
 
-          <ChartCard title={`USERS Rolling (Last ${rollingWindow} Days)`} className="glow">
+          <ChartCard title={`USERS Rolling (Last ${rollingWindow} Days)`}  >
             <CpuRollingChart data={data.usersRoll} />
           </ChartCard>
 
@@ -196,7 +193,7 @@ const DashboardLayout = () => {
             />
           </ChartCard>
 
-          <ChartCard title={`Storage Rolling (Last ${rollingWindow} Days)`} className="glow">
+          <ChartCard title={`Storage Rolling (Last ${rollingWindow} Days)`}  >
             <CpuRollingChart data={data.storageRoll} />
           </ChartCard>
 
@@ -214,11 +211,11 @@ const DashboardLayout = () => {
             />
           </ChartCard>
 
-          <ChartCard title="Peak Efficiency" className="glow">
+          <ChartCard title="Peak Efficiency"  >
             <PeakDemandChart data={data.peakEfficiency} resource="Efficiency" />
           </ChartCard>
 
-          <ChartCard title="Top Regions by Efficiency" className="glow">
+          <ChartCard title="Top Regions by Efficiency"  >
             <TopRegionsChart
               data={data.topRegionsEfficiency}
               resource="Efficiency"
@@ -236,7 +233,7 @@ const DashboardLayout = () => {
             <HolidayImpactChart data={data.holidayImpact} />
           </ChartCard>
 
-          <ChartCard title="Holiday Efficiency Impact" className="glow">
+          <ChartCard title="Holiday Efficiency Impact"  >
             <HolidayImpactChart
               data={data.holidayEfficiencyImpact}
               resource="Efficiency"
@@ -272,14 +269,14 @@ const DashboardLayout = () => {
             />
           </ChartCard>
 
-          <ChartCard title="Top Regions by Efficiency" className="glow">
+          <ChartCard title="Top Regions by Efficiency"  >
             <TopRegionsChart
               data={data.topRegionsEfficiency}
               resource="Efficiency"
             />
           </ChartCard>
 
-          <ChartCard title="Regional Comparison Efficiency" className="glow">
+          <ChartCard title="Regional Comparison Efficiency"  >
             <RegionalComparisonChart
               data={data.regionalComparisonEfficiency}
               resource="Efficiency"

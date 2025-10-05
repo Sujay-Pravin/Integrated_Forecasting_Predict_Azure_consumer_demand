@@ -1,0 +1,43 @@
+.model-page{
+  gap: 5px;
+  padding: 20px;
+  overflow-x: hidden;
+}
+
+.ind-model-chart-container{
+   display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 2rem;
+  background-color: var(--dark-100);
+  padding: 10px;
+  border-radius: 7px;
+  margin: 7px;
+}
+
+.top3-model-chart-container {
+  display: flex;
+  flex-direction: column; 
+  gap: 1rem;
+  background-color: var(--dark-100);
+  padding: 10px;
+  border-radius: 7px;
+  margin: 7px;
+
+}
+
+.top3-model-chart-container > * {
+  width: 100%;  
+  margin: 7px;
+
+}
+
+.btn {
+  color: var(--text-color);
+  width: max(fit-content, 100%);
+  padding: 8px;
+  background: var(--nav-bg);
+  border-radius: 8px;
+  border: 1px solid var(--dark-100);
+  margin: 0 8px;
+  cursor: pointer;
+}

@@ -6,6 +6,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Navigation from './components/Navigation/Navigation';
 import DataPage from './pages/DataPage/DataPage';
 import FeaturePage from './pages/FeaturePage/FeaturePage';
+import ModelPage from './pages/ModelPage/ModelPage';
+import Forecast from './pages/ForecastPage/Forecast';
 
 const Main = () => {
   useEffect(() => {
@@ -19,6 +21,8 @@ const Main = () => {
         <Route path="/" element={<Home />} />
         <Route path="/data" element={<DataPage />} />
         <Route path="/features" element={<FeaturePage/>} />
+        <Route path="/models" element={<ModelPage/>} />
+        <Route path="/forecast" element={<Forecast/>} />
       </Routes>
     </>
   );

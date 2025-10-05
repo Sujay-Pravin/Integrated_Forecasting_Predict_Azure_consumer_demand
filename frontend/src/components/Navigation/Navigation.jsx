@@ -41,7 +41,27 @@ const Navigation = () => {
           Features
         </a>
 
+        <a
+          onClick={() => {
+            navigate("/forecast");
+            setCurrent("Forecast");
+          }}
+          className={current == "Forecast" ? "nav-link active" : "nav-link"}
+        >
+          <span className="nav-icon"></span>
+          Forecasts
+        </a>
 
+        <a
+          onClick={() => {
+            navigate("/models");
+            setCurrent("Model");
+          }}
+          className={current == "Model" ? "nav-link active" : "nav-link"}
+        >
+          <span className="nav-icon"></span>
+          Model
+        </a>
 
          <a
           onClick={() => {

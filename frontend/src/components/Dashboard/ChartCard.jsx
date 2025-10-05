@@ -1,7 +1,7 @@
 import { React, useState } from "react";
 import "./ChartCard.css";
 
-const ChartCard = ({ title, children, className = "" }) => {
+const ChartCard = ({ title, children, className = "", scale = "1.75" }) => {
   const [clicked, setClicked] = useState(false);
 
   return (
@@ -15,7 +15,7 @@ const ChartCard = ({ title, children, className = "" }) => {
           top: clicked ? "50%" : "auto",
           left: clicked ? "50%" : "auto",
           transform: clicked
-            ? "translate(-50%, -50%) scale(2)"
+            ? `translate(-50%, -50%) scale(${scale})`
             : "scale(1)",
           zIndex: clicked ? 1000 : 1,
           transition: "transform 0.3s ease, top 0.3s ease, left 0.3s ease",
