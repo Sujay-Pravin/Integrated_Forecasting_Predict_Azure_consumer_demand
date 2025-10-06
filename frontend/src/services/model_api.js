@@ -18,6 +18,8 @@ export const model_endpoints = {
   forecast_cpu: 'models/forecast/cpu',
   forecast_storage: 'models/forecast/storage',
   forecast_users: 'models/forecast/users',
+  model_monitoring: 'models/monitoring',
+
   forecast_cpu: (region, horizon = 30) =>
     `models/forecast?region=${region}&service=compute&horizon=${horizon}`,
 

@@ -294,3 +294,79 @@ def download_forecast_csv():
         mimetype="text/csv",
         headers={"Content-Disposition": f"attachment;filename={service}_forecast_region_{region}.csv"}
     )
+
+
+
+@model_bp.route("/monitoring", methods=["GET"])
+def monitoring():
+    try:
+        metrics_csv_path = os.path.join(BASE_DIR, "Model", "results", "top_models_summary.csv")
+
+        if os.path.exists(metrics_csv_path):
+            df_metrics = pd.read_csv(metrics_csv_path)
+
+        df_metrics = df_metrics.dropna(subset=["Target", "Best_Model"], how="any")
+        df_metrics = df_metrics[df_metrics["Target"].notnull() & (df_metrics["Target"] != "")]
+        df_metrics = df_metrics.reset_index(drop=True)
+
+        num_cols = [
+            "Val_MAE", "Val_RMSE", "Val_MAPE", "Val_Bias",
+            "Test_MAE", "Test_RMSE", "Test_MAPE", "Test_Bias"
+        ]
+        for c in num_cols:
+            if c in df_metrics.columns:
+                df_metrics[c] = pd.to_numeric(df_metrics[c], errors="coerce")
+
+        monitoring = {}
+
+        for _, row in df_metrics.iterrows():
+            target = str(row["Target"]).strip()
+            model_name = str(row["Best_Model"]).strip()
+
+            val_mape = row.get("Val_MAPE")
+            test_mape = row.get("Test_MAPE")
+
+            val_mape = float(val_mape) if pd.notnull(val_mape) else None
+            test_mape = float(test_mape) if pd.notnull(test_mape) else None
+
+            baseline_accuracy = round(100.0 - val_mape, 3) if val_mape is not None else None
+            current_accuracy = round(100.0 - test_mape, 3) if test_mape is not None else None
+            error_drift = None
+            if baseline_accuracy is not None and current_accuracy is not None:
+                error_drift = round(baseline_accuracy - current_accuracy, 3)
+
+            monitoring[target] = {
+                "model_name": model_name,
+                "validation": {
+                    "MAE": float(row["Val_MAE"]) if pd.notnull(row["Val_MAE"]) else None,
+                    "RMSE": float(row["Val_RMSE"]) if pd.notnull(row["Val_RMSE"]) else None,
+                    "MAPE": val_mape,
+                    "Bias": float(row["Val_Bias"]) if pd.notnull(row["Val_Bias"]) else None,
+                },
+                "test": {
+                    "MAE": float(row["Test_MAE"]) if pd.notnull(row["Test_MAE"]) else None,
+                    "RMSE": float(row["Test_RMSE"]) if pd.notnull(row["Test_RMSE"]) else None,
+                    "MAPE": test_mape,
+                    "Bias": float(row["Test_Bias"]) if pd.notnull(row["Test_Bias"]) else None,
+                },
+                "baseline_accuracy": baseline_accuracy,
+                "current_accuracy": current_accuracy,
+                "error_drift": error_drift,
+            }
+
+        try:
+            data_mtime = os.path.getmtime(file_path_cpu)
+            last_data_date = datetime.fromtimestamp(data_mtime).isoformat()
+            days_since_last = (datetime.now() - datetime.fromtimestamp(data_mtime)).days
+        except Exception:
+            last_data_date = None
+            days_since_last = None
+
+        response = {
+            "models": monitoring
+        }
+
+        return jsonify(response)
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500

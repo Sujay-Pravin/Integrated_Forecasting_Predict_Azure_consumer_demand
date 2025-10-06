@@ -14,6 +14,8 @@ import {
 } from "../../services/model_api";
 import ActualVsPredictedChart from "../../components/charts/ActualVsPredictedChart.jsx";
 
+import MonitoringChart from "../../components/charts/MonitoringChart"; 
+
 const ModelPage = () => {
   const [topCPU, setTopCPU] = useState([]);
   const [topStorage, setTopStorage] = useState([]);
@@ -24,6 +26,7 @@ const ModelPage = () => {
   const [marchCPU, setMarchCPU] = useState([]);
   const [marchStorage, setMarchStorage] = useState([]);
   const [marchUsers, setMarchUsers] = useState([]);
+  const [monitoring, setMonitoring] = useState({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -40,15 +43,21 @@ const ModelPage = () => {
           model_metrics_endpoints.storage_top3
         );
         const usersTop3 = await fetchData(model_metrics_endpoints.users_top3);
+
         const CPUmarch = await fetchModelData(model_endpoints.march_cpu);
         const storageMarch = await fetchModelData(
           model_endpoints.march_storage
         );
         const usersMarch = await fetchModelData(model_endpoints.march_users);
 
+        const monitoringData = await fetchModelData(
+          model_endpoints.model_monitoring
+        );
+
         setMarchCPU(CPUmarch);
         setMarchStorage(storageMarch);
         setMarchUsers(usersMarch);
+
         setTopCPU(cpuData);
         setTopStorage(storageData);
         setTopUsers(usersData);
@@ -56,6 +65,8 @@ const ModelPage = () => {
         setTop3CPU(cpuTop3);
         setTop3Storage(storageTop3);
         setTop3Users(usersTop3);
+
+        setMonitoring(monitoringData);
       } catch (error) {
         console.error("Failed to load model metrics:", error);
       } finally {
@@ -67,6 +78,24 @@ const ModelPage = () => {
   }, []);
 
   if (loading) return <div>Loading...</div>;
+
+  const renderMonitoringCharts = () => {
+    if (!monitoring?.models) return null;
+
+    return Object.keys(monitoring.models).map((target) => {
+      const model = monitoring.models[target];
+      return (
+        <ChartCard key={target} title={`Monitoring: ${target}`}>
+          <MonitoringChart
+            modelName={model.model_name}
+            baselineAccuracy={model.baseline_accuracy}
+            currentAccuracy={model.current_accuracy}
+            errorDrift={model.error_drift}
+          />
+        </ChartCard>
+      );
+    });
+  };
 
   return (
     <div className="model-page">
@@ -114,6 +143,9 @@ const ModelPage = () => {
           <Top3ModelsChart data={top3Users} />
         </ChartCard>
       </div>
+
+      <h1>Model Monitoring (Accuracy & Error Drift)</h1>
+      <div className="ind-model-chart-container">{renderMonitoringCharts()}</div>
     </div>
   );
 };
