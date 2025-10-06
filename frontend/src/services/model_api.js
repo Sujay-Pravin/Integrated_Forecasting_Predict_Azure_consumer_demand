@@ -19,6 +19,10 @@ export const model_endpoints = {
   forecast_storage: 'models/forecast/storage',
   forecast_users: 'models/forecast/users',
   model_monitoring: 'models/monitoring',
+  model_retrain_status : 'models/retrain/status',
+  model_retrain_compare : 'models/retrain/compare',
+  model_retrain : 'models/retrain',
+  model_switch : 'models/retrain/switch',
 
   forecast_cpu: (region, horizon = 30) =>
     `models/forecast?region=${region}&service=compute&horizon=${horizon}`,
@@ -31,4 +35,5 @@ export const model_endpoints = {
 
   download_forecast: (region, service, horizon = 30) =>
     `models/forecast/download?region=${region}&service=${service}&horizon=${horizon}`,
+
 };

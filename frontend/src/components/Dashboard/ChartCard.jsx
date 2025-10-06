@@ -1,7 +1,7 @@
 import { React, useState } from "react";
 import "./ChartCard.css";
 
-const ChartCard = ({ title, children, className = "", scale = "1.75" }) => {
+const ChartCard = ({ title, children, className = "", scale = "1.75", fitheight = "" }) => {
   const [clicked, setClicked] = useState(false);
 
   return (
@@ -30,7 +30,7 @@ const ChartCard = ({ title, children, className = "", scale = "1.75" }) => {
           {clicked? "Close" : "expand"}
         </button>
       </div>
-      <div className="chart-content">{children}</div>
+      <div className={`chart-content ${fitheight}`}>{children}</div>
     </div>
     </>
   );

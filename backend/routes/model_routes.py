@@ -2,10 +2,15 @@ import os
 import pandas as pd
 from flask import Blueprint, jsonify, request
 import joblib
-from datetime import timedelta
+from datetime import timedelta, datetime
 import numpy as np
 import requests
 from flask import request, jsonify
+import pickle
+from sklearn.base import clone
+from sklearn.metrics import mean_absolute_error, mean_squared_error
+import shutil
+
 model_bp = Blueprint("models", __name__)
 
 # ---------- Load dataset ----------
@@ -164,6 +169,11 @@ SERVICE_MAP = {
     "users": {"model": model_users, "target": "users_active"}
 }
 
+LAST_TRAINING_DATES = {
+    "usage_cpu": datetime(2023, 5, 30),     # Models were trained with data up to March 30
+    "usage_storage": datetime(2023, 5, 30),  # Setting last training to May 30 as discussed  
+    "users_active": datetime(2023, 5, 30)
+}
 
 @model_bp.route("/forecast", methods=["GET"])
 def forecast():
@@ -370,3 +380,381 @@ def monitoring():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+def mean_absolute_percentage_error(y_true, y_pred):
+    """Helper function for MAPE calculation"""
+    y_true, y_pred = np.array(y_true), np.array(y_pred)
+    return np.mean(np.abs((y_true - y_pred) / np.maximum(y_true, 1e-8))) * 100
+
+retrained_model_path = os.path.join(BASE_DIR, "backend", "models", "retrained_models")
+retrained_results_path = os.path.join(BASE_DIR, "Model", "retrained_results")
+retrained_csv_path = os.path.join(BASE_DIR, "Model", "retrained_results", "csv")
+
+os.makedirs(retrained_model_path, exist_ok=True) 
+os.makedirs(retrained_results_path, exist_ok=True)
+os.makedirs(retrained_csv_path, exist_ok=True)
+
+def save_retrain_results_csv(retrain_results, timestamp):
+    """Save retrain results to CSV"""
+    results_list = []
+    for target, data in retrain_results.items():
+        metrics = data["metrics"]
+        results_list.append({
+            "target": target,
+            "service": data["service"],
+            "retrain_date": data["retrain_date"],
+            "model_path": data["model_path"],
+            "MAE": metrics["MAE"],
+            "RMSE": metrics["RMSE"],
+            "MAPE": metrics["MAPE"],
+            "Bias": metrics["Bias"]
+        })
+    
+    df = pd.DataFrame(results_list)
+    csv_filename = f"retrain_results_{timestamp}.csv"
+    csv_path = os.path.join(retrained_csv_path, csv_filename)
+    df.to_csv(csv_path, index=False)
+    return csv_path
+
+def retrain_model(model, target_col, df, test_size=0.2):
+    try:
+        df = df.copy()
+        df["date"] = pd.to_datetime(df["date"])
+        
+        df = df.sort_values("date")
+        split_idx = int(len(df) * (1 - test_size))
+        train_df = df.iloc[:split_idx]
+        test_df = df.iloc[split_idx:]
+        
+        feature_cols = [col for col in df.columns if col not in ["date", "usage_cpu", "usage_storage", "users_active", "unique_id"]]
+        
+        X_train = train_df[feature_cols].fillna(0)
+        y_train = train_df[target_col].fillna(train_df[target_col].mean())
+        
+        X_test = test_df[feature_cols].fillna(0)
+        y_test = test_df[target_col].fillna(test_df[target_col].mean())
+        
+        new_model = clone(model)
+        new_model.fit(X_train, y_train)
+        
+        test_pred = new_model.predict(X_test)
+        
+        metrics = {
+            "MAE": mean_absolute_error(y_test, test_pred),
+            "RMSE": np.sqrt(mean_squared_error(y_test, test_pred)),
+            "MAPE": mean_absolute_percentage_error(y_test, test_pred),
+            "Bias": np.mean(test_pred - y_test)
+        }
+        
+        return new_model, metrics
+    except Exception as e:
+        print(f"Error in retrain_model: {str(e)}")
+        raise
+
+@model_bp.route("/retrain", methods=["POST"])
+def retrain_models():
+    try:
+        cleanup_retrain_folders()
+        
+        current_date = datetime.now()
+        last_data_date = pd.to_datetime(encoded_insights["date"]).max()
+        force = request.args.get('force', 'false').lower() == 'true'
+        
+        response = {
+            "last_data_date": last_data_date.strftime("%Y-%m-%d"),
+            "models_status": []
+        }
+        
+        retrain_results = {}
+        
+        for service, config in SERVICE_MAP.items():
+            target = config["target"]
+            last_trained = LAST_TRAINING_DATES.get(target)
+            
+            if last_trained:
+                days_since_data = (last_data_date - last_trained).days
+                model_needs_retrain = days_since_data > 30 and last_data_date > last_trained
+            else:
+                model_needs_retrain = True
+                
+            if not force and not model_needs_retrain:
+                response["models_status"].append({
+                    "service": service,
+                    "target": target,
+                    "message": f"Model is current (last trained: {last_trained.strftime('%Y-%m-%d')}, last data: {last_data_date.strftime('%Y-%m-%d')})",
+                    "needs_retrain": False
+                })
+                continue
+
+            try:
+                model = config["model"]
+                new_model, metrics = retrain_model(model, target, encoded_insights)
+                
+                timestamp = current_date.strftime("%Y%m%d_%H%M%S")
+                model_filename = f"{target}_retrained_model_{timestamp}.pkl"
+                model_path = os.path.join(retrained_model_path, model_filename)
+                joblib.dump(new_model, model_path)
+                
+                LAST_TRAINING_DATES[target] = current_date
+                
+                retrain_results[target] = {
+                    "service": service,
+                    "metrics": metrics,
+                    "model_path": model_path,
+                    "retrain_date": timestamp
+                }
+                
+                response["models_status"].append({
+                    "service": service,
+                    "target": target,
+                    "message": "Model retrained successfully",
+                    "metrics": metrics,
+                    "model_file": model_filename,
+                    "needs_retrain": False
+                })
+            except Exception as e:
+                response["models_status"].append({
+                    "service": service,
+                    "target": target,
+                    "error": str(e),
+                    "needs_retrain": True
+                })
+        
+        if retrain_results:
+            timestamp = current_date.strftime("%Y%m%d_%H%M%S")
+            results_filename = f"retrain_results_{timestamp}.pkl"
+            results_path = os.path.join(retrained_results_path, results_filename)
+            with open(results_path, 'wb') as f:
+                pickle.dump(retrain_results, f)
+            
+            csv_path = save_retrain_results_csv(retrain_results, timestamp)
+            
+            response["results_saved"] = {
+                "pickle": results_path,
+                "csv": csv_path
+            }
+
+        return jsonify(response)
+    
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@model_bp.route("/retrain/status", methods=["GET"])
+def check_retrain_status():
+    try:
+        current_date = datetime.now()
+        last_data_date = pd.to_datetime(encoded_insights["date"]).max()
+        
+        status = []
+        for service, config in SERVICE_MAP.items():
+            target = config["target"]
+            last_trained = LAST_TRAINING_DATES.get(target)
+            
+            if last_trained:
+                # Compare with last data date instead of current date
+                days_since_data = (last_data_date - last_trained).days
+                needs_retrain = days_since_data > 30 and last_data_date > last_trained
+            else:
+                needs_retrain = True
+            
+            status.append({
+                "service": service,
+                "target": target,
+                "last_trained_date": last_trained.strftime("%Y-%m-%d") if last_trained else None,
+                "last_data_date": last_data_date.strftime("%Y-%m-%d"),
+                "days_since_new_data": days_since_data if last_trained else None,
+                "needs_retrain": needs_retrain,
+                "retrain_reason": "Up to date with current data" if not needs_retrain else 
+                                "New data available" if last_data_date > last_trained else
+                                "Never trained"
+            })
+        
+        return jsonify({
+            "last_data_date": last_data_date.strftime("%Y-%m-%d"),
+            "models_status": status
+        })
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@model_bp.route("/retrain/compare", methods=["GET"])
+def compare_models():
+    try:
+        retrain_files = sorted(os.listdir(retrained_results_path))
+        if not retrain_files:
+            return jsonify({"error": "No retrained models found"}), 404
+            
+        latest_retrain_file = os.path.join(retrained_results_path, retrain_files[-1])
+        with open(latest_retrain_file, 'rb') as f:
+            retrain_results = pickle.load(f)
+            
+        metrics_csv_path = os.path.join(BASE_DIR, "Model", "results", "top_models_summary.csv")
+        if not os.path.exists(metrics_csv_path):
+            return jsonify({"error": "Original model metrics not found"}), 404
+            
+        df_metrics = pd.read_csv(metrics_csv_path)
+        
+        comparison = []
+        for target, results in retrain_results.items():
+            original = df_metrics[df_metrics["Target"] == target].iloc[0]
+            retrained = results["metrics"]
+            
+            better_mae = float(retrained["MAE"]) < float(original["Test_MAE"])
+            better_rmse = float(retrained["RMSE"]) < float(original["Test_RMSE"])
+            better_mape = float(retrained["MAPE"]) < float(original["Test_MAPE"])
+            
+            is_better = {
+                "MAE": "improved" if better_mae else "not improved",
+                "RMSE": "improved" if better_rmse else "not improved",
+                "MAPE": "improved" if better_mape else "not improved"
+            }
+            
+            improvements_count = sum([better_mae, better_rmse, better_mape])
+            is_better["Overall"] = "improved" if improvements_count > 1 else "not improved"
+            
+            comparison.append({
+                "target": target,
+                "service": results["service"],
+                "original_metrics": {
+                    "MAE": float(original["Test_MAE"]),
+                    "RMSE": float(original["Test_RMSE"]),
+                    "MAPE": float(original["Test_MAPE"])
+                },
+                "retrained_metrics": {
+                    "MAE": float(retrained["MAE"]),
+                    "RMSE": float(retrained["RMSE"]),
+                    "MAPE": float(retrained["MAPE"])
+                },
+                "improvements": is_better,
+                "improvement_summary": {
+                    "metrics_improved": improvements_count,
+                    "total_metrics": 3,
+                    "percent_improved": round((improvements_count / 3) * 100, 2)
+                },
+                "retrained_model_path": results["model_path"],
+                "retrain_date": results["retrain_date"]
+            })
+            
+        return jsonify({
+            "comparisons": comparison,
+            "retrain_results_file": latest_retrain_file
+        })
+        
+    except Exception as e:
+        print(f"Error in compare_models: {str(e)}")  
+        return jsonify({"error": str(e)}), 500
+
+@model_bp.route("/retrain/switch", methods=["POST"])
+def switch_models():
+    try:
+        force = request.args.get('force', 'false').lower() == 'true'
+        
+        try:
+            retrain_files = sorted(os.listdir(retrained_results_path))
+            if not retrain_files:
+                return jsonify({"error": "No retrained models found"}), 404
+
+            latest_retrain_file = os.path.join(retrained_results_path, retrain_files[-1])
+            with open(latest_retrain_file, 'rb') as f:
+                retrain_results = pickle.load(f)
+
+            metrics_csv_path = os.path.join(BASE_DIR, "Model", "results", "top_models_summary.csv")
+            if not os.path.exists(metrics_csv_path):
+                return jsonify({"error": "Original model metrics not found"}), 404
+
+            df_metrics = pd.read_csv(metrics_csv_path)
+            switched_models = []
+
+            for target, results in retrain_results.items():
+                original = df_metrics[df_metrics["Target"] == target].iloc[0]
+                retrained = results["metrics"]
+
+                better_mae = float(retrained["MAE"]) < float(original["Test_MAE"])
+                better_rmse = float(retrained["RMSE"]) < float(original["Test_RMSE"])
+                better_mape = float(retrained["MAPE"]) < float(original["Test_MAPE"])
+                improvements_count = sum([better_mae, better_rmse, better_mape])
+                
+                if force or improvements_count > 1:
+                    service = results["service"]
+                    
+                    # Backup original model
+                    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                    backup_dir = os.path.join(BASE_DIR, "backend", "models", "backup_models", timestamp)
+                    os.makedirs(backup_dir, exist_ok=True)
+
+                    # Get original model path
+                    original_model_path = None
+                    for svc, config in SERVICE_MAP.items():
+                        if config["target"] == target:
+                            original_model_path = os.path.join(BASE_DIR, "backend", "models", "backtested_models", f"{target}_best_model.pkl")
+                            break
+
+                    if original_model_path and os.path.exists(original_model_path):
+                        # Backup original
+                        backup_path = os.path.join(backup_dir, os.path.basename(original_model_path))
+                        shutil.copy2(original_model_path, backup_path)  # Use copy2 instead of rename
+
+                        # Move retrained to original location
+                        retrained_path = results["model_path"]
+                        if os.path.exists(retrained_path):
+                            shutil.copy2(retrained_path, original_model_path)
+
+                            # Update SERVICE_MAP model
+                            new_model = joblib.load(original_model_path)
+                            for svc, config in SERVICE_MAP.items():
+                                if config["target"] == target:
+                                    config["model"] = new_model
+                                    break
+
+                            switched_models.append({
+                                "target": target,
+                                "service": service,
+                                "backup_path": backup_path,
+                                "new_model_path": original_model_path,
+                                "improvements": {
+                                    "MAE": float(original["Test_MAE"]) - float(retrained["MAE"]),
+                                    "RMSE": float(original["Test_RMSE"]) - float(retrained["RMSE"]),
+                                    "MAPE": float(original["Test_MAPE"]) - float(retrained["MAPE"])
+                                }
+                            })
+
+            if switched_models:
+                return jsonify({
+                    "message": "Models switched successfully",
+                    "switched_models": switched_models
+                })
+            else:
+                return jsonify({
+                    "message": "No models were switched - retrained models did not show improvement"
+                })
+
+        except Exception as e:
+            print(f"Error during model switching: {str(e)}")
+            return jsonify({"error": f"Model switching failed: {str(e)}"}), 500
+
+    except Exception as e:
+        print(f"Error in switch_models: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+def cleanup_retrain_folders():
+    """Clean up retrain folders while ensuring they exist"""
+    folders = [
+        retrained_model_path,
+        retrained_results_path,
+        retrained_csv_path
+    ]
+    
+    for folder in folders:
+        try:
+            os.makedirs(folder, exist_ok=True)
+            
+            for filename in os.listdir(folder):
+                file_path = os.path.join(folder, filename)
+                try:
+                    if os.path.isfile(file_path):
+                        os.unlink(file_path)
+                except Exception as e:
+                    print(f'Failed to delete {file_path}. Reason: {e}')
+                    
+        except Exception as e:
+            print(f'Error handling folder {folder}: {e}')

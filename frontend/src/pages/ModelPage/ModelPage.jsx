@@ -14,7 +14,8 @@ import {
 } from "../../services/model_api";
 import ActualVsPredictedChart from "../../components/charts/ActualVsPredictedChart.jsx";
 
-import MonitoringChart from "../../components/charts/MonitoringChart"; 
+import MonitoringChart from "../../components/charts/MonitoringChart";
+import RetrainingPage from "../../components/Retraining/RetrainingPage.jsx";
 
 const ModelPage = () => {
   const [topCPU, setTopCPU] = useState([]);
@@ -28,6 +29,7 @@ const ModelPage = () => {
   const [marchUsers, setMarchUsers] = useState([]);
   const [monitoring, setMonitoring] = useState({});
   const [loading, setLoading] = useState(true);
+  const [modelPageType, setModelPageType] = useState("ModelPage");
 
   useEffect(() => {
     const fetchAllData = async () => {
@@ -99,53 +101,72 @@ const ModelPage = () => {
 
   return (
     <div className="model-page">
-      <h1>Selected Model Metrics</h1>
-      <div className="ind-model-chart-container">
-        <ChartCard title="CPU Model Metrics">
-          <ModelMetricsChart data={topCPU} />
-        </ChartCard>
+      <select
+        value={modelPageType}
+        onChange={(e) => setModelPageType(e.target.value)}
+        className="view-selector"
+      >
+        <option value="ModelPage">Model Page</option>
+        <option value="ModelRetrainPage">Retraining Page</option>
+      </select>
+      {modelPageType === "ModelPage" && (
+        <div>
+          <h1>Selected Model Metrics</h1>
+          <div className="ind-model-chart-container">
+            <ChartCard title="CPU Model Metrics">
+              <ModelMetricsChart data={topCPU} />
+            </ChartCard>
 
-        <ChartCard title="Storage Model Metrics">
-          <ModelMetricsChart data={topStorage} />
-        </ChartCard>
+            <ChartCard title="Storage Model Metrics">
+              <ModelMetricsChart data={topStorage} />
+            </ChartCard>
 
-        <ChartCard title="Users Model Metrics">
-          <ModelMetricsChart data={topUsers} />
-        </ChartCard>
-      </div>
+            <ChartCard title="Users Model Metrics">
+              <ModelMetricsChart data={topUsers} />
+            </ChartCard>
+          </div>
 
-      <h1>Actual vs Predicted Values for March by the selected Models</h1>
-      <div className="top3-model-chart-container">
-        <ChartCard title="CPU Model Metrics">
-          <ActualVsPredictedChart data={marchCPU} />
-        </ChartCard>
+          <h1>Actual vs Predicted Values for March by the selected Models</h1>
+          <div className="top3-model-chart-container">
+            <ChartCard title="CPU Model Metrics">
+              <ActualVsPredictedChart data={marchCPU} />
+            </ChartCard>
 
-        <ChartCard title="Storage Model Metrics">
-          <ActualVsPredictedChart data={marchStorage} />
-        </ChartCard>
+            <ChartCard title="Storage Model Metrics">
+              <ActualVsPredictedChart data={marchStorage} />
+            </ChartCard>
 
-        <ChartCard title="Users Model Metrics">
-          <ActualVsPredictedChart data={marchUsers} />
-        </ChartCard>
-      </div>
+            <ChartCard title="Users Model Metrics">
+              <ActualVsPredictedChart data={marchUsers} />
+            </ChartCard>
+          </div>
 
-      <h1>TOP 3 Models</h1>
-      <div className="top3-model-chart-container">
-        <ChartCard title="TOP 3 MODELS TO PREDICT CPU USAGE" scale="1">
-          <Top3ModelsChart data={top3CPU} />
-        </ChartCard>
+          <h1>TOP 3 Models</h1>
+          <div className="top3-model-chart-container">
+            <ChartCard title="TOP 3 MODELS TO PREDICT CPU USAGE" scale="1">
+              <Top3ModelsChart data={top3CPU} />
+            </ChartCard>
 
-        <ChartCard title="TOP 3 MODELS TO PREDICT STORAGE USAGE" scale="1">
-          <Top3ModelsChart data={top3Storage} />
-        </ChartCard>
+            <ChartCard title="TOP 3 MODELS TO PREDICT STORAGE USAGE" scale="1">
+              <Top3ModelsChart data={top3Storage} />
+            </ChartCard>
 
-        <ChartCard title="TOP 3 MODELS TO PREDICT USERS ACTIVE" scale="1">
-          <Top3ModelsChart data={top3Users} />
-        </ChartCard>
-      </div>
+            <ChartCard title="TOP 3 MODELS TO PREDICT USERS ACTIVE" scale="1">
+              <Top3ModelsChart data={top3Users} />
+            </ChartCard>
+          </div>
 
-      <h1>Model Monitoring (Accuracy & Error Drift)</h1>
-      <div className="ind-model-chart-container">{renderMonitoringCharts()}</div>
+          <h1>Model Monitoring (Accuracy & Error Drift)</h1>
+          <div className="ind-model-chart-container">
+            {renderMonitoringCharts()}
+          </div>
+        </div>
+      )}
+      {
+        modelPageType === "ModelRetrainPage" && (
+          <RetrainingPage/>
+        )
+      }
     </div>
   );
 };
