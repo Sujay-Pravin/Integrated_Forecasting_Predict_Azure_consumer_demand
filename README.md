@@ -1,108 +1,136 @@
-# AZURE_BACKEND_TEAM-B
+# Azure Resource Demand Forecasting Project
+
+## 🌟 Overview
+A machine learning-based solution for predicting Azure resource demand, combining classical ML, deep learning, and time series analysis to forecast CPU usage, storage utilization, and active user counts.
+
+## 📂 Project Structure
+```
+e:\Infosys\Project
+├── backend/                  # Flask API server
+│   ├── routes/              # API route handlers
+│   ├── models/              # Trained ML models
+│   └── requirements.txt     # Python dependencies
+├── frontend/                # React frontend
+│   ├── src/                # React source code
+│   └── package.json        # Node dependencies
+├── Data/                   # Data storage
+│   ├── Raw/               # Raw data files
+│   ├── Processed/         # Cleaned data
+│   └── Models/            # Model-specific data
+├── Model/                 # Model training code
+├── Notebooks/            # Jupyter notebooks
+└── reports/             # Project documentation
+```
+
+## 🚀 Quick Start
+
+### Prerequisites
+- Python 3.8+
+- Node.js 18+
+- Git
+- Virtual Environment (recommended)
+
+### Backend Setup
+
+1. Create & activate Python virtual environment:
+```bash
+# Windows
+python -m venv venv
+venv\Scripts\activate
+
+# Linux/Mac
+python -m venv venv
+source venv/bin/activate
+```
+
+2. Install Python dependencies:
+```bash
+cd backend
+pip install -r requirements.txt
+```
+
+3. Start Flask server:
+```bash
+python app.py
+# Server runs on http://localhost:5000
+```
+
+### Frontend Setup
+
+1. Install Node dependencies:
+```bash
+cd frontend
+npm install
+```
+
+2. Start development server:
+```bash
+npm run dev
+# Frontend runs on http://localhost:5173
+```
+
+### Data Pipeline Setup
+
+1. Place raw data files in `Data/Raw/`:
+   - azure_usage.csv
+   - external_factors.csv
+
+2. Run notebooks in order:
+```bash
+cd Notebooks
+jupyter notebook
+```
+Execute:
+1. Data_Loading.ipynb - Initial data loading
+2. data_prep.ipynb - Data preprocessing
+3. time_based.ipynb - Feature engineering
+
+## 🔧 Model Training
+
+1. Navigate to Model directory:
+```bash
+cd Model
+```
+
+2. Run training notebooks in order:
+- models.ipynb - Base model development
+- model.ipynb - Enhanced models
+- backtest.ipynb - Model validation
+
+## 🛠️ Development
+
+### Backend Development
+- Flask API with modular blueprints
+- Routes in `backend/routes/`
+- Models saved in `backend/models/`
+
+### Frontend Development
+- React + Vite
+- Components in `frontend/src/components`
+- Pages in `frontend/src/pages`
+- API services in `frontend/src/services`
+
+## 📊 Key Features
+- Time series forecasting
+- Multi-model comparison
+- Feature engineering pipeline
+- Model backtesting
+- Interactive dashboards
+- Real-time predictions
+
+## 🔍 Monitoring & Maintenance
+- Models automatically retrain on new data
+- Performance metrics tracking
+- Model drift detection
+- Automated backtesting
+
+## 💻 Technology Stack
+- **Backend**: Flask, Python
+- **Frontend**: React, Vite
+- **ML/DL**: Scikit-learn, XGBoost, TensorFlow
+- **Data**: Pandas, NumPy
+- **Visualization**: Chart.js, Recharts
 
 
-# Azure Demand Forecasting – Milestone 1
-
-This project forecasts Azure Compute & Storage demand using ML models. This milestone focuses on data collection and preparation.
-
-## Contents
-- Azure usage data (simulated)
-- External factors (economic indicators)
-- Jupyter Notebooks for EDA & Cleaning
-- Merged dataset ready for feature engineering
-
-## Instructions
-1. Clone the repo
-2. Run notebooks in sequence
-3. Submit cleaned CSV + screenshots of visualizations
-
-## requirements.txt
-pandas
-numpy
-matplotlib
-seaborn
-jupyter
-openpyxl
-
-## necessary docs
-Dummy CSV files
-
-Sample Jupyter notebook for 01_data_loading_eda.ipynb
-
-EDA report template (eda_report.md)?
-
-# 📝 EDA Report – Milestone 1
-
-## 📅 Project: Azure Demand Forecasting  
-**Milestone:** Data Collection & Preparation  
-**Team:** [Backend - B]  
-**Date:** [20-08-25]
-
----
-
-## 1. 📂 Datasets Used
-- `azure_usage.csv`: Simulated data for Azure Compute & Storage usage  
-- `external_factors.csv`: Economic indicators and cloud market demand
-
-## 2. 📊 Key Observations
-### Azure Usage:
-- Number of records: [X]  
-- Regions covered: [List of regions]  
-- Average CPU usage: [Value]  
-- Average Storage usage: [Value]  
-- Active users range: [Min - Max]
-
-### External Data:
-- Economic Index range: [Min - Max]  
-- Market Demand: [Mean/Std]  
-- Holidays: Weekend indicator included
-
-## 3. 🧼 Data Quality Checks
-| Column | Missing Values | Action Taken         |
-|--------|----------------|----------------------|
-| usage_cpu | 0 | N/A |
-| usage_storage | 3 | Filled using forward fill |
-| ... | ... | ... |
-
-## 4. 📈 Visualizations
-- Total CPU usage trend over time  
-- Region-wise average usage bar chart  
-- Correlation heatmap (if done)
-
-## 5. 🧩 Merging External Data
-Successfully merged internal and external datasets on `date`.
-
-## 6. ✅ Final Output
-Cleaned dataset saved at: `data/processed/cleaned_merged.csv`  
-Ready for feature engineering.
-
----
-
-## 📌 Notes / Challenges
-- [Mention any issues faced]  
-- [Ideas for improvement]
-
-
-## FOLDER_STRUCTURE
-
-azure-demand-forecasting/
-│
-├── data/
-│   ├── raw/
-│   │   ├── azure_usage.csv
-│   │   └── external_factors.csv
-│   └── processed/
-│       └── cleaned_merged.csv
-│
-├── notebooks/
-│   ├── 01_data_loading_eda.ipynb
-│   └── 02_data_cleaning_merging.ipynb
-│
-├── scripts/
-│   └── utils.py
-│
-├── reports/
-│   └── eda_report.md
-│
-├── requirements.txt
-└── README.md
+## 📝 License
+MIT License
