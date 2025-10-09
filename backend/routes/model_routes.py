@@ -411,7 +411,7 @@ def save_retrain_results_csv(retrain_results, timestamp):
         })
     
     df = pd.DataFrame(results_list)
-    csv_filename = f"retrain_results_{timestamp}.csv"
+    csv_filename = f"retrain_results.csv"
     csv_path = os.path.join(retrained_csv_path, csv_filename)
     df.to_csv(csv_path, index=False)
     return csv_path
@@ -454,7 +454,7 @@ def retrain_model(model, target_col, df, test_size=0.2):
 @model_bp.route("/retrain", methods=["POST"])
 def retrain_models():
     try:
-        cleanup_retrain_folders()
+        # cleanup_retrain_folders()
         
         current_date = datetime.now()
         last_data_date = pd.to_datetime(encoded_insights["date"]).max()
@@ -491,7 +491,7 @@ def retrain_models():
                 new_model, metrics = retrain_model(model, target, encoded_insights)
                 
                 timestamp = current_date.strftime("%Y%m%d_%H%M%S")
-                model_filename = f"{target}_retrained_model_{timestamp}.pkl"
+                model_filename = f"{target}_retrained_model.pkl"
                 model_path = os.path.join(retrained_model_path, model_filename)
                 joblib.dump(new_model, model_path)
                 
@@ -522,7 +522,7 @@ def retrain_models():
         
         if retrain_results:
             timestamp = current_date.strftime("%Y%m%d_%H%M%S")
-            results_filename = f"retrain_results_{timestamp}.pkl"
+            results_filename = f"retrain_results.pkl"
             results_path = os.path.join(retrained_results_path, results_filename)
             with open(results_path, 'wb') as f:
                 pickle.dump(retrain_results, f)

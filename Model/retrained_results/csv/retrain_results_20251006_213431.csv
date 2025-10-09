@@ -1,4 +1,0 @@
-target,service,retrain_date,model_path,MAE,RMSE,MAPE,Bias
-usage_cpu,compute,20251006_213431,E:\Infosys\Project\backend\models\retrained_models\usage_cpu_retrained_model_20251006_213431.pkl,13.559647560119629,15.790427502382823,19.49486549439818,0.546019677762632
-usage_storage,storage,20251006_213431,E:\Infosys\Project\backend\models\retrained_models\usage_storage_retrained_model_20251006_213431.pkl,3.826791286468506,4.867693977272202,0.33357371913277684,-0.6441541601110388
-users_active,users,20251006_213431,E:\Infosys\Project\backend\models\retrained_models\users_active_retrained_model_20251006_213431.pkl,76.25890350341797,90.53943158577373,24.936147935710043,14.677462259928385
