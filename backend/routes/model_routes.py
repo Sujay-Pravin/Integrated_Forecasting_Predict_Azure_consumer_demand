@@ -18,7 +18,7 @@ BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
 file_path_cpu = os.path.join(BASE_DIR, "Data", "models", "enhanced_features.csv")
 
 model_cpu_path = os.path.join(BASE_DIR, "backend", "models","backtested_models", "usage_cpu_best_model.pkl")
-model_storage_path = os.path.join(BASE_DIR, "backend", "models", "backtested_models", "usage_storage_best_e_model.pkl")
+model_storage_path = os.path.join(BASE_DIR, "backend", "models", "backtested_models", "usage_storage_best_model.pkl")
 model_users_path = os.path.join(BASE_DIR, "backend", "models", "backtested_models", "users_active_best_model.pkl")
 
 encoded_insights = pd.read_csv(file_path_cpu)
